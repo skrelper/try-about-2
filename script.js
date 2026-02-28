@@ -66,30 +66,78 @@ function createTint(hue, alpha) {
   return `hsla(${hue.toFixed(0)}, ${saturation}%, ${lightness}%, ${alpha.toFixed(3)})`;
 }
 
+function hslToRgb(h, s, l) {
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const hh = h / 60;
+  const x = c * (1 - Math.abs((hh % 2) - 1));
+  let r = 0;
+  let g = 0;
+  let b = 0;
+
+  if (hh >= 0 && hh < 1) {
+    r = c;
+    g = x;
+  } else if (hh >= 1 && hh < 2) {
+    r = x;
+    g = c;
+  } else if (hh >= 2 && hh < 3) {
+    g = c;
+    b = x;
+  } else if (hh >= 3 && hh < 4) {
+    g = x;
+    b = c;
+  } else if (hh >= 4 && hh < 5) {
+    r = x;
+    b = c;
+  } else {
+    r = c;
+    b = x;
+  }
+
+  const m = l - c / 2;
+  return {
+    r: Math.round((r + m) * 255),
+    g: Math.round((g + m) * 255),
+    b: Math.round((b + m) * 255)
+  };
+}
+
 function buildRandomTextureGradient() {
-  const hueShift = randomInRange(55, 160);
+  const hueShift = randomInRange(16, 42);
   const direction = Math.random() > 0.5 ? 1 : -1;
   const baseHue = (lastHue + hueShift * direction + 360) % 360;
   lastHue = baseHue;
 
-  const radialLayers = Array.from({ length: 4 }, (_, i) => {
-    const hue = (baseHue + i * randomInRange(22, 58) + randomInRange(-12, 12)) % 360;
-    const alpha = randomInRange(0.05, 0.13);
-    const x = randomInRange(14, 86).toFixed(1);
-    const y = randomInRange(12, 88).toFixed(1);
-    const stop = randomInRange(46, 66).toFixed(1);
+  const grid = 16;
+  const canvas = document.createElement("canvas");
+  canvas.width = grid;
+  canvas.height = grid;
+  const ctx = canvas.getContext("2d", { alpha: false });
 
-    return `radial-gradient(circle at ${x}% ${y}%, ${createTint(hue, alpha)}, rgba(0, 0, 0, 0) ${stop}%)`;
-  });
+  if (!ctx) {
+    return `linear-gradient(135deg, ${createTint(baseHue, 0.3)}, ${createTint((baseHue + 120) % 360, 0.3)})`;
+  }
 
-  const grainAngle = randomInRange(25, 150).toFixed(1);
-  const grainAlpha = randomInRange(0.023, 0.038).toFixed(3);
+  for (let y = 0; y < grid; y++) {
+    for (let x = 0; x < grid; x++) {
+      const nx = x / (grid - 1);
+      const ny = y / (grid - 1);
+      const wave =
+        Math.sin((nx * Math.PI * 2) + randomInRange(-0.35, 0.35)) +
+        Math.cos((ny * Math.PI * 2) + randomInRange(-0.35, 0.35));
+      const swirl = Math.sin((nx + ny) * Math.PI * 2 + randomInRange(-0.5, 0.5));
 
-  radialLayers.push(
-    `repeating-linear-gradient(${grainAngle}deg, rgba(255, 255, 255, ${grainAlpha}) 0 2px, rgba(0, 0, 0, 0) 2px 13px)`
-  );
+      const hue = (baseHue + wave * 34 + swirl * 26 + nx * 72 + ny * 46 + 360) % 360;
+      const sat = 0.56 + randomInRange(-0.07, 0.07);
+      const light = 0.48 + randomInRange(-0.06, 0.06);
+      const rgb = hslToRgb(hue, sat, light);
 
-  return radialLayers.join(",");
+      ctx.fillStyle = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+      ctx.fillRect(x, y, 1, 1);
+    }
+  }
+
+  return `url(${canvas.toDataURL("image/png")})`;
 }
 
 function applyTextureGradient(layer) {
@@ -136,7 +184,7 @@ if (textureLayers.length > 0) {
   }
 }
 
-setInterval(transitionTexture, 12000);
+setInterval(transitionTexture, 8500);
 
 if (textureToggle) {
   textureToggle.addEventListener("click", (e) => {
@@ -213,6 +261,9 @@ function spin(slot, words) {
 
     const extraFullTurns = (2 + Math.floor(Math.random() * 2)) * wordsCount;
     const targetAbsolute = currentAbsolute + extraFullTurns + deltaToTarget;
+    const lowerBound = wordsCount;
+    const upperBound = wordsCount * (COPIES - 1);
+    let rebaseOffset = 0;
 
     const start = performance.now();
     const duration = 2400 + Math.random() * 700;
@@ -225,8 +276,19 @@ function spin(slot, words) {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
       const eased = easeOutCubic(progress);
-      const nextAbsolute =
+      const virtualAbsolute =
         currentAbsolute + (targetAbsolute - currentAbsolute) * eased;
+      let nextAbsolute = virtualAbsolute + rebaseOffset;
+
+      while (nextAbsolute > upperBound) {
+        rebaseOffset -= wordsCount;
+        nextAbsolute -= wordsCount;
+      }
+
+      while (nextAbsolute < lowerBound) {
+        rebaseOffset += wordsCount;
+        nextAbsolute += wordsCount;
+      }
 
       slot.style.transform = `translateY(-${nextAbsolute * ROW_HEIGHT}px)`;
       updateWordOpacity(slot, nextAbsolute);
