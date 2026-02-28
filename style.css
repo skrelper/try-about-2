@@ -34,24 +34,32 @@ body {
   inset: -20%;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.08;
+  opacity: 0;
   mix-blend-mode: screen;
-  filter: blur(24px) contrast(130%);
-  background-image:
-    radial-gradient(circle at 20% 25%, rgba(255, 255, 255, 0.09), rgba(0, 0, 0, 0) 55%),
-    radial-gradient(circle at 82% 70%, rgba(160, 190, 255, 0.06), rgba(0, 0, 0, 0) 60%),
-    radial-gradient(circle at 35% 80%, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0) 48%),
-    repeating-linear-gradient(65deg, rgba(255, 255, 255, 0.022) 0 2px, rgba(0, 0, 0, 0) 2px 14px);
+  filter: blur(18px) contrast(145%) saturate(125%);
+  background-image: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0) 60%);
   transform: translate3d(0, 0, 0) scale(1.12);
   animation: textureDrift 34s ease-in-out infinite alternate;
+  transition: opacity 2.6s ease;
+}
+
+.texture-layer.visible {
+  opacity: 0.15;
+}
+
+.texture-layer-alt {
+  transform: translate3d(0, 0, 0) scale(1.15);
+  animation-duration: 39s;
 }
 
 .texture-layer::after {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.45;
-  background-image: repeating-radial-gradient(circle at center, rgba(255, 255, 255, 0.02) 0 1px, rgba(0, 0, 0, 0) 1px 8px);
+  opacity: 0.62;
+  background-image:
+    repeating-radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0 1px, rgba(0, 0, 0, 0) 1px 8px),
+    repeating-linear-gradient(130deg, rgba(170, 210, 255, 0.03) 0 1px, rgba(0, 0, 0, 0) 1px 11px);
   mix-blend-mode: screen;
 }
 
@@ -68,7 +76,7 @@ body {
 }
 
 body.texture-off .texture-layer {
-  opacity: 0;
+  opacity: 0 !important;
 }
 
 .texture-toggle {
@@ -78,8 +86,8 @@ body.texture-off .texture-layer {
   z-index: 4;
   padding: 6px 10px;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(0, 0, 0, 0.45);
-  color: rgba(255, 255, 255, 0.55);
+  background: rgba(0, 0, 0, 0.2);
+  color: rgba(255, 255, 255, 0.44);
   font-family: "Helvetica", sans-serif;
   font-size: 11px;
   letter-spacing: 0.7px;
@@ -89,7 +97,7 @@ body.texture-off .texture-layer {
 }
 
 .texture-toggle:hover {
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, 0.72);
   border-color: rgba(255, 255, 255, 0.35);
 }
 
@@ -143,6 +151,36 @@ body::after {
   align-items: center;
 }
 
+.slot-container::before {
+  content: "";
+  position: absolute;
+  inset: -180px -40px;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.95) 0,
+      rgba(0, 0, 0, 0.45) 16%,
+      rgba(0, 0, 0, 0) 34%,
+      rgba(0, 0, 0, 0) 66%,
+      rgba(0, 0, 0, 0.42) 84%,
+      rgba(0, 0, 0, 0.95) 100%
+    );
+}
+
+.slot-container::after {
+  content: "";
+  position: absolute;
+  inset: -140px -34px;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    radial-gradient(ellipse at center, rgba(115, 170, 255, 0.08) 0, rgba(0, 0, 0, 0) 50%),
+    radial-gradient(ellipse at center, rgba(255, 130, 180, 0.06) 18%, rgba(0, 0, 0, 0) 58%);
+  filter: blur(18px);
+}
+
 /* spinning column */
 .slot {
   position: absolute;
@@ -153,6 +191,7 @@ body::after {
   align-items: flex-start;
   font-family: "WordFont";
   font-size: 30px;
+  letter-spacing: -0.015em;
   will-change: transform;
 }
 
@@ -166,6 +205,8 @@ body::after {
   transition: transform 0.2s, opacity 0.2s;
   white-space: nowrap;
   opacity: 0.15;
+  -webkit-text-stroke: 0.2px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 0.8px rgba(255, 255, 255, 0.15);
 }
 
 /* selected word */
