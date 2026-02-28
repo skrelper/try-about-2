@@ -2,7 +2,7 @@
    PUT YOUR WORD LISTS HERE
 =========================== */
 
-const verbs = [
+const phrases = [
   "ASMRing",
   "birdcalling",
   "singing a song",
@@ -41,52 +41,34 @@ const verbs = [
   "talking loudly"
 ];
 
-const topics = [
-  "the ocean",
-  "government secrets",
-  "ancient machinery",
-  "green apples",
-  "impossible happiness",
-  "your childhood memories",
-  "how to make a friend",
-  "spoiled brats",
-  "your biggest pet peeve",
-  "photography",
-  "the worst feeling ever",
-  "childhood memories",
-  "how to laugh",
-  "the saddest song ever",
-  "romance movies",
-  "your dream date",
-  "pronouns",
-  "what you see right now",
-  "accounting",
-  "the phone you own",
-  "your lockscreen",
-  "your dream job",
-  "things that you hate",
-  "a love story",
-  "the economic state of the world",
-  "what happiness looks like",
-  "the color of sadness",
-  "what you do when you're bored",
-  "historical landmarks",
-  "the best candy bar ever",
-  "ear protection at concerts",
-  "therapy",
-  "art school",
-  "whatever you want",
-  "your identity",
-  "religion",
-  "a collapsing universe"
-];
-
 /* ===========================
    CORE LOGIC BELOW
 =========================== */
 
-const verbSlot = document.getElementById("verb-slot");
-const topicSlot = document.getElementById("topic-slot");
+const phraseSlot = document.getElementById("phrase-slot");
+const textureToggle = document.getElementById("texture-toggle");
+
+const TEXTURE_STORAGE_KEY = "try-about-texture-enabled";
+
+function setTextureEnabled(enabled) {
+  document.body.classList.toggle("texture-off", !enabled);
+
+  if (textureToggle) {
+    textureToggle.textContent = enabled ? "texture: on [1]" : "texture: off [1]";
+  }
+
+  localStorage.setItem(TEXTURE_STORAGE_KEY, String(enabled));
+}
+
+const savedTexturePref = localStorage.getItem(TEXTURE_STORAGE_KEY);
+setTextureEnabled(savedTexturePref !== "false");
+
+if (textureToggle) {
+  textureToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    setTextureEnabled(document.body.classList.contains("texture-off"));
+  });
+}
 
 const COPIES = 7;
 const MIDDLE_COPY = Math.floor(COPIES / 2);
@@ -95,14 +77,10 @@ const ROW_HEIGHT = 84;
 function updateWordOpacity(slot, absolutePosition) {
   Array.from(slot.children).forEach((child, index) => {
     const distance = Math.abs(index - absolutePosition);
+    const distanceBand = Math.max(0, Math.round(distance));
+    const opacity = 1 / Math.pow(2, distanceBand);
 
-    if (distance < 0.5) {
-      child.style.opacity = "1";
-    } else if (distance < 1.5) {
-      child.style.opacity = "0.45";
-    } else {
-      child.style.opacity = "0.15";
-    }
+    child.style.opacity = String(opacity);
   });
 }
 
@@ -137,8 +115,7 @@ function populateSlot(slot, words) {
   updateWordOpacity(slot, startAbsoluteIndex);
 }
 
-populateSlot(verbSlot, verbs);
-populateSlot(topicSlot, topics);
+populateSlot(phraseSlot, phrases);
 
 let spinning = false;
 
@@ -196,13 +173,19 @@ function triggerSpin() {
   if (spinning) return;
   spinning = true;
 
-  Promise.all([spin(verbSlot, verbs), spin(topicSlot, topics)]).then(() => {
+  spin(phraseSlot, phrases).then(() => {
     spinning = false;
   });
 }
 
 /* trigger on spacebar */
 document.addEventListener("keydown", (e) => {
+  if (e.code === "Digit1") {
+    e.preventDefault();
+    setTextureEnabled(document.body.classList.contains("texture-off"));
+    return;
+  }
+
   if (e.code === "Space") {
     e.preventDefault();
     triggerSpin();

@@ -28,6 +28,71 @@ body {
   position: relative;
 }
 
+
+.texture-layer {
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  mix-blend-mode: screen;
+  filter: blur(24px) contrast(130%);
+  background-image:
+    radial-gradient(circle at 20% 25%, rgba(255, 255, 255, 0.09), rgba(0, 0, 0, 0) 55%),
+    radial-gradient(circle at 82% 70%, rgba(160, 190, 255, 0.06), rgba(0, 0, 0, 0) 60%),
+    radial-gradient(circle at 35% 80%, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0) 48%),
+    repeating-linear-gradient(65deg, rgba(255, 255, 255, 0.022) 0 2px, rgba(0, 0, 0, 0) 2px 14px);
+  transform: translate3d(0, 0, 0) scale(1.12);
+  animation: textureDrift 34s ease-in-out infinite alternate;
+}
+
+.texture-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  background-image: repeating-radial-gradient(circle at center, rgba(255, 255, 255, 0.02) 0 1px, rgba(0, 0, 0, 0) 1px 8px);
+  mix-blend-mode: screen;
+}
+
+@keyframes textureDrift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1.1);
+  }
+  50% {
+    transform: translate3d(1.5%, 2%, 0) scale(1.18);
+  }
+  100% {
+    transform: translate3d(-1%, 1%, 0) scale(1.13);
+  }
+}
+
+body.texture-off .texture-layer {
+  opacity: 0;
+}
+
+.texture-toggle {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  z-index: 4;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.55);
+  font-family: "Helvetica", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.7px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+.texture-toggle:hover {
+  color: rgba(255, 255, 255, 0.82);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
 /* top and bottom fade for reel illusion */
 body::before,
 body::after {
@@ -114,7 +179,9 @@ body::after {
   bottom: 40px;
   font-size: 14px;
   opacity: 0.2;
-  letter-spacing: 2px;
+  letter-spacing: 0.8px;
   font-family: "Helvetica";
+  -webkit-text-stroke: 0.35px black;
+  text-shadow: 0 0 0 black;
   z-index: 3;
 }
