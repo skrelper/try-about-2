@@ -200,8 +200,6 @@ function triggerSpin() {
   if (spinning) return;
   spinning = true;
 
-  transitionTexture();
-
   spin(phraseSlot, phrases).then(() => {
     spinning = false;
   });
@@ -209,12 +207,6 @@ function triggerSpin() {
 
 /* trigger on spacebar */
 document.addEventListener("keydown", (e) => {
-  if (e.code === "Digit1") {
-    e.preventDefault();
-    setTextureEnabled(document.body.classList.contains("texture-off"));
-    return;
-  }
-
   if (e.code === "Space") {
     e.preventDefault();
     triggerSpin();
